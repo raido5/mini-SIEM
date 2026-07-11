@@ -1,10 +1,11 @@
 import re 
 import csv
 
-motif = r"(\d{4}-\d\d-\d\d \d\d:\d\d:\d\d) server sshd\[\d+\]: (\w+) password for (\w+) from ([\d.]+)"
+ssh_motif = r"(\d{4}-\d\d-\d\d \d\d:\d\d:\d\d) server sshd\[\d+\]: (\w+) password for (\w+) from ([\d.]+)"
+http_motif = r'^(\d+\.\d+\.\d+\.\d+) - - \[([^\]]+)\] "(\w+) ([^ ]+) ([^"]+)" (\d{3}) (\d+)'
 
 def parse_ssh_line(line):
-    result=re.search(motif,line)
+    result=re.search(ssh_motif,line)
     if not result:
         return None
     status="success" if result.group(2) =="Accepted" else "failed"
@@ -14,7 +15,10 @@ def parse_ssh_line(line):
         "ip":result.group(4),
         "event_type":"login",
         "user":result.group(3),
-        "status":status,
+        "path": None,
+        "status": status,
+        "status_code": None,
+        "label": None,
     }
 
 def parse_ssh_file(filepath):
@@ -25,6 +29,37 @@ def parse_ssh_file(filepath):
             if not line:
                 continue
             event=parse_ssh_line(line)
+            if event is None:
+                continue
+            events.append(event)
+    return events
+
+def parse_http_line(line):
+    result=re.search(http_motif,line)
+    if not result:
+        return None
+    status_code = int(result.group(6))
+    status = "success" if 200 <= status_code < 400 else "failed"
+    return {
+        "timestamp": result.group(2),
+        "source":"http",
+        "ip":result.group(1),
+        "event_type":"request",
+        "user":None,
+        "path":result.group(4),
+        "status":status,
+        "status_code":status_code,
+        "label":None,     
+    }
+
+def parse_http_file(filepath):
+    events = []
+    with open(filepath, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            event = parse_http_line(line)
             if event is None:
                 continue
             events.append(event)
