@@ -1,8 +1,15 @@
+from datetime import datetime
 import re 
 import csv
 
 ssh_motif = r"(\d{4}-\d\d-\d\d \d\d:\d\d:\d\d) server sshd\[\d+\]: (\w+) password for (\w+) from ([\d.]+)"
 http_motif = r'^(\d+\.\d+\.\d+\.\d+) - - \[([^\]]+)\] "(\w+) ([^ ]+) ([^"]+)" (\d{3}) (\d+)'
+
+
+def convert_http_timestamp(raw):
+    raw = raw.split(" ")[0]                             
+    dt = datetime.strptime(raw, "%d/%b/%Y:%H:%M:%S")    
+    return dt.strftime("%Y-%m-%d %H:%M:%S")            
 
 def parse_ssh_line(line):
     result=re.search(ssh_motif,line)
@@ -41,7 +48,7 @@ def parse_http_line(line):
     status_code = int(result.group(6))
     status = "success" if 200 <= status_code < 400 else "failed"
     return {
-        "timestamp": result.group(2),
+        "timestamp": convert_http_timestamp(result.group(2)),
         "source":"http",
         "ip":result.group(1),
         "event_type":"request",
@@ -78,6 +85,8 @@ def write_csv(events,output_path):
 
 
 if __name__=="__main__":
-    events = parse_ssh_file("data/raw/ssh/sample_auth.log")
-    write_csv(events, "data/interim/parsed_events.csv")
+    events_ssh = parse_ssh_file("data/raw/ssh/sample_auth.log")
+    events_http = parse_http_file("data/raw/http/sample_acces.log")
+    all_events= events_ssh+events_http
+    write_csv(all_events, "data/interim/parsed_events.csv")
 
