@@ -1,0 +1,9 @@
+ip,failed_logins,success_logins,unique_users,http_requests,unique_paths,ratio_404,sensitive_paths,label
+192.168.1.10,1,5,1,4,4,0.0,0,normal
+192.168.1.11,0,1,1,0,0,0.0,0,normal
+192.168.1.12,0,1,1,0,0,0.0,0,normal
+203.0.113.55,6,0,0,6,6,1.0,6,web_scan
+45.12.88.10,10,0,10,0,0,0.0,0,brute_force
+45.13.99.20,4,0,0,4,1,0.0,0,brute_force
+66.77.88.99,1,2,0,3,3,0.3333333333333333,3,possible_compromise
+91.44.20.7,3,1,1,0,0,0.0,0,possible_compromise
