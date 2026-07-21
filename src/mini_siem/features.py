@@ -50,3 +50,5 @@ def write_csv(features, output_path):
         
 if __name__ == "__main__":
     build_features("data/interim/parsed_events.csv", "data/processed/features_v1.csv")
+
+

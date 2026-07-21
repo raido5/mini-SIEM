@@ -28,19 +28,6 @@ def parse_ssh_line(line):
         "label": None,
     }
 
-def parse_ssh_file(filepath):
-    events=[]
-    with open(filepath,"r",encoding="utf-8") as f:
-        for line in f:
-            line=line.strip()
-            if not line:
-                continue
-            event=parse_ssh_line(line)
-            if event is None:
-                continue
-            events.append(event)
-    return events
-
 def parse_http_line(line):
     result=re.search(http_motif,line)
     if not result:
@@ -59,19 +46,22 @@ def parse_http_line(line):
         "label":None,     
     }
 
-def parse_http_file(filepath):
+def parse_file(filepath, source):
+    parsers = {
+        "ssh": parse_ssh_line,
+        "http": parse_http_line,
+    }
+    parse_line = parsers[source]
     events = []
     with open(filepath, "r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
                 continue
-            event = parse_http_line(line)
-            if event is None:
-                continue
-            events.append(event)
+            event = parse_line(line)
+            if event is not None:
+                events.append(event)
     return events
-
 
 COLONNES = ["timestamp", "source", "ip", "event_type", "user", "path", "status", "status_code", "label"]
 
@@ -84,9 +74,11 @@ def write_csv(events,output_path):
             writer.writerow(event)
 
 
-if __name__=="__main__":
-    events_ssh = parse_ssh_file("data/raw/ssh/sample_auth.log")
-    events_http = parse_http_file("data/raw/http/sample_acces.log")
-    all_events= events_ssh+events_http
-    write_csv(all_events, "data/interim/parsed_events.csv")
+if __name__ == "__main__":
+    events_ssh = parse_file( "data/raw/ssh/sample_auth.log","ssh",)
+
+    events_http = parse_file("data/raw/http/sample_acces.log","http",)
+
+    all_events = events_ssh + events_http
+    write_csv(all_events,"data/interim/parsed_events.csv",)
 
