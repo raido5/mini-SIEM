@@ -77,7 +77,7 @@ def write_csv(events,output_path):
 if __name__ == "__main__":
     events_ssh = parse_file( "data/raw/ssh/sample_auth.log","ssh",)
 
-    events_http = parse_file("data/raw/http/sample_acces.log","http",)
+    events_http = parse_file("data/raw/http/sample_access.log","http",)
 
     all_events = events_ssh + events_http
     write_csv(all_events,"data/interim/parsed_events.csv",)

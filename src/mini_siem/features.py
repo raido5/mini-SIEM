@@ -12,6 +12,8 @@ LABELS = {
     "45.13.99.20": "brute_force",
     "203.0.113.55": "web_scan",
     "66.77.88.99": "possible_compromise",
+    "198.51.100.7": "web_scan",
+    "172.16.9.44": "web_scan",
 }
 
 def build_features(input_path,output_path):
